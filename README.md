@@ -4,7 +4,7 @@ This is a multi-threaded WinForms desktop application built with .NET 9. It simu
 
 ## ✨ Features
 
-- Add and process simulated "orders" with predefined durations.
+- Add and process simulated "orders" with random durations.
 - Asynchronous task execution using `async/await`.
 - Thread-safe UI updates using `Invoke` pattern.
 - Color-coded order statuses (`Pending`, `Processing`, `Completed`, `Cancelled`).
