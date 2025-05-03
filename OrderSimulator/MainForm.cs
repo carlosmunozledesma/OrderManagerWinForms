@@ -1,13 +1,14 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace OrderSimulator
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private int orderCounter = 1;
         private ConcurrentDictionary<string, Order> orders = new ConcurrentDictionary<string, Order>();
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -29,7 +30,7 @@ namespace OrderSimulator
             orders[id] = order;
 
             var listViewItem = new ListViewItem(id);
-            listViewItem.SubItems.Add(order.Status);
+            listViewItem.SubItems.Add(order.Status.ToString());
             listViewItem.SubItems.Add(order.StartTime.ToString("HH:mm:ss"));
             listViewItem.SubItems.Add(""); // End time
             listViewItem.SubItems.Add(""); // Progress
@@ -41,42 +42,46 @@ namespace OrderSimulator
         private async void ProcessOrderAsync(Order order, ListViewItem listViewItem)
         {
             var token = order.CancellationTokenSource.Token;
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
-                await Task.Run(() =>
-                {
-                    Log($"[Order {order.Id}] Started processing...");
+                Log($"[Order {order.Id}] Started processing...");
 
-                    Thread.Sleep(3000); // Simulated initial wait
+                // Simulated initial wait (1 second)
+                await Task.Delay(1000, token);
+
+                order.Status = OrderStatus.Processing;
+                UpdateListView(listViewItem, order);
+                Log($"[Order {order.Id}] Now processing...");
+
+                int totalDurationMs = order.DurationInSeconds * 1000;
+                int step = 100; // ms per update
+                int steps = totalDurationMs / step;
+
+                for (int i = 1; i <= steps; i++)
+                {
+                    await Task.Delay(step, token); // Non-blocking
                     token.ThrowIfCancellationRequested();
 
-                    order.Status = "Processing";
+                    order.Progress = (i * 100) / steps;
                     UpdateListView(listViewItem, order);
-                    Log($"[Order {order.Id}] Now processing...");
+                }
 
-                    for (int i = 1; i <= 100; i++)
-                    {
-                        Thread.Sleep(30); // Simulate work
-                        token.ThrowIfCancellationRequested();
-                        order.Progress = i;
-                        UpdateListView(listViewItem, order);
-                    }
-
-                    order.Status = "Completed";
-                    order.EndTime = DateTime.Now;
-                    UpdateListView(listViewItem, order);
-                    Log($"[Order {order.Id}] Completed.");
-                }, token);
+                order.Status = OrderStatus.Completed;
+                order.EndTime = DateTime.Now;
+                UpdateListView(listViewItem, order);
+                Log($"[Order {order.Id}] Completed.");
             }
             catch (OperationCanceledException)
             {
-                order.Status = "Cancelled";
+                order.Status = OrderStatus.Cancelled;
                 order.EndTime = DateTime.Now;
                 UpdateListView(listViewItem, order);
                 Log($"[Order {order.Id}] Cancelled.");
             }
         }
+
 
 
         private void UpdateListView(ListViewItem listViewItem, Order order)
@@ -87,7 +92,7 @@ namespace OrderSimulator
                 return;
             }
 
-            listViewItem.SubItems[1].Text = order.Status;
+            listViewItem.SubItems[1].Text = order.Status.ToString();
             listViewItem.SubItems[3].Text = order.EndTime?.ToString("HH:mm:ss") ?? "";
             listViewItem.SubItems[4].Text = $"{order.Progress}%";
             listViewOrders.Invalidate(); // Redibuja para aplicar colores
@@ -103,13 +108,13 @@ namespace OrderSimulator
 
             if (orders.TryGetValue(orderId, out Order order))
             {
-                if (order.Status == "Pending" || order.Status == "Processing")
+                if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Processing)
                 {
                     order.CancellationTokenSource.Cancel();
                 }
             }
         }
-
+         
         private void Log(string message)
         {
             if (txtLog.InvokeRequired)
@@ -133,16 +138,16 @@ namespace OrderSimulator
             {
                 switch (order.Status)
                 {
-                    case "Pending":
+                    case OrderStatus.Pending:
                         backColor = Color.LightYellow;
                         break;
-                    case "Processing":
+                    case OrderStatus.Processing:
                         backColor = Color.LightBlue;
                         break;
-                    case "Completed":
+                    case OrderStatus.Completed:
                         backColor = Color.LightGreen;
                         break;
-                    case "Cancelled":
+                    case OrderStatus.Cancelled:
                         backColor = Color.LightCoral;
                         break;
                 }
