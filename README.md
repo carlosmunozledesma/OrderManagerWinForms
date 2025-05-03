@@ -33,6 +33,7 @@ This is a multi-threaded WinForms desktop application built with .NET 9. It simu
 
 - `MainForm.cs` – Core logic and UI interactions
 - `Order.cs` – Order model
+- `OrderStatus.cs` – Enum for order status
 
 ## 🧠 Learning Objectives
 
