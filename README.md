@@ -23,10 +23,10 @@ This is a multi-threaded WinForms desktop application built with .NET 9. It simu
 
 ## 📷 Screenshots
 
-> *(Insert a couple of screenshots of the app running — main window, progress, colored list, etc.)*
-> ![image](https://github.com/user-attachments/assets/b05b5d49-16d1-47a7-8140-bdb304cb5065)
-![image](https://github.com/user-attachments/assets/760f36be-1335-4437-8b67-e44334c4230c)
-![image](https://github.com/user-attachments/assets/45834637-a34b-4dfd-a792-c04d175bff0d)
+![image](https://github.com/user-attachments/assets/d4bce13d-0ec1-431c-ae01-ffae8debf08b)
+![image](https://github.com/user-attachments/assets/5a442ce8-6018-4b13-93d5-68faa9de8e33)
+![image](https://github.com/user-attachments/assets/74063000-0620-4f39-be37-8b071f1a2f7f)
+
 
 
 ## 🗃️ Project Structure
